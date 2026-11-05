@@ -1,8 +1,10 @@
-## Pyhton Module 5
-### Exercise 0: The Sealed Laboratory
+## Python Module 05: Environment Management & Configuration
+### Peer Evaluation Checklist & Verification Guide
 
 This document provides a step-by-step checklist to test the project exercises during the peer evaluation.
 
+
+### Exercise 0: The Sealed Laboratory
 
 #### Turn-in Files Verification
 
@@ -101,3 +103,84 @@ poetry run python loading.py
 ```
 
 * **Expected output:** Poetry launches the script using its internal isolated environment and runs the loading sequence with all dependencies resolved.
+
+### Exercise 1: The Matrix Oracle
+
+This section details the verification steps for configuration loading, security validations, and environment prioritization during the peer evaluation.
+
+#### Turn-in Files Verification
+
+Ensure only the authorized files exist in the exercise directory:
+
+```bash
+ls -la ex1/
+```
+
+**Expected turn-in checklist:**
+- [ ] `oracle.py`
+- [ ] `requirements.txt`
+- [ ] `.env.example`
+- [ ] `.gitignore`
+
+#### Create and activate a local virtual environment:
+
+```bash
+python3 -m venv .venv
+```
+
+```bash
+source .venv/bin/activate
+```
+
+#### Install dependencies from requirements.txt
+
+```bash
+pip install -r ex1/requirements.txt
+```
+
+#### Scenario A: Execution with Default Values (No `.env` file)
+
+Ensure no local `.env` file exists in `ex1/` before running this test:
+
+```bash
+cd ex1
+python3 oracle.py
+```
+
+* **Expected output:**
+  - Status message: `ORACLE STATUS: Consulting the configuration...`.
+  - A clean `WARNING` listing all 5 missing keys (`MATRIX_MODE`, `DATABASE_URL`, `API_KEY`, `LOG_LEVEL`, `ZION_ENDPOINT`).
+  - Fallback to `development` defaults, displaying the raw default API key (`default_dev_key`).
+  - Security check passes with `[OK]` for hardcoded secrets, Git ignore rules, and production override availability.
+
+#### Scenario B: Local Configuration via `.env`
+
+Generate the local configuration file from the template:
+
+```bash
+cp .env.example .env
+```
+
+Run the script again:
+
+```bash
+python3 oracle.py
+```
+
+* **Expected output:**
+  - No `WARNING` message appears because all variables are loaded into memory via `load_dotenv()`.
+  - Configuration displays the customized values defined in `.env`.
+  - In `development` mode, the key remains visible in plaintext for debugging.
+
+#### Scenario C: Production Override via Environment Variable
+
+Verify that shell environment variables take precedence over `.env` files without modifying disk configuration:
+
+```bash
+MATRIX_MODE=production python3 oracle.py
+```
+
+* **Expected output:**
+  - Loaded mode changes to `production`.
+  - **Secret masking:** The API key is masked with asterisks (`************************`).
+  - Security validation confirms production overrides operate correctly.
